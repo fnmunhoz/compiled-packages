@@ -1,0 +1,46 @@
+require 'bunchr'
+
+Bunchr.install_dir = '/opt/ruby'
+Bunchr.build_dir = '/tmp/build/ruby'
+
+ruby_version = ENV['RUBY_VERSION'] || '1.9.3-p194'
+
+Bunchr::Software.new do |t|
+  t.name = 'ruby'
+  t.version = ruby_version
+
+  os   = t.ohai['os']
+  arch = t.ohai['kernel']['machine']
+
+  t.download_commands << "curl -O http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-#{ruby_version}.tar.gz"
+  t.download_commands << "tar xfvz ruby-#{ruby_version}.tar.gz"
+
+  t.build_commands << "./configure --prefix=#{Bunchr.install_dir} \
+                      --with-opt-dir=#{Bunchr.install_dir} \
+                      --enable-shared \
+                      --disable-install-doc"
+  t.build_commands << "make"
+
+  t.install_commands << "make install"
+
+  CLEAN << Bunchr.install_dir
+  CLEAN << Bunchr.build_dir
+end
+
+Bunchr::Packages.new do |t|
+  t.name = 'ruby'
+  t.version = ruby_version
+  t.iteration = ENV['BUILD_NUMBER'] || '1'
+
+  t.category = 'Language'
+  t.license  = 'MIT License'
+  t.vendor   = 'Ilha Virtual Inc'
+  t.url      = 'https://github.com/fnmunhoz/compiled-packages'
+  t.description = 'A programming language'
+
+  t.include_software('ruby')
+
+  t.files << Bunchr.install_dir
+end
+
+task :default => ['packages:ruby']
