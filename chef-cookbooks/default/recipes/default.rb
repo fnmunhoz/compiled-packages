@@ -8,6 +8,8 @@ end
 
 package "build-essential"
 
+package "libyaml-dev"
+
 package "curl"
 
 gem_package "bunchr"
